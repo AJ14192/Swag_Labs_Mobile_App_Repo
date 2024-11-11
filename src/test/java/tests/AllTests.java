@@ -16,6 +16,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collections;
 
 public class AllTests {
@@ -46,7 +47,7 @@ public class AllTests {
     }
 
     @Test
-    public void Login(){
+    public void login(){
         driver.findElement(AppiumBy.accessibilityId("test-Username")).sendKeys("standard_user");
         driver.findElement(AppiumBy.accessibilityId("test-Password")).sendKeys("secret_sauce");
         WebElement loginButton = driver.findElement(AppiumBy.accessibilityId("test-LOGIN"));
@@ -65,10 +66,64 @@ public class AllTests {
 
     }
 
+    @Test
+    public void buyProduct(){
+
+        PointerInput finger = new PointerInput(PointerInput.Kind.TOUCH, "finger");
+
+        driver.findElement(AppiumBy.accessibilityId("test-Username")).sendKeys("standard_user");
+        driver.findElement(AppiumBy.accessibilityId("test-Password")).sendKeys("secret_sauce");
+        driver.findElement(AppiumBy.accessibilityId("test-LOGIN")).click();
+        driver.findElement(AppiumBy.xpath("(//android.view.ViewGroup[@content-desc=\"test-ADD TO CART\"])[1]")).click();
+        driver.findElement(AppiumBy.accessibilityId("test-Cart")).click();
+        driver.findElement(AppiumBy.accessibilityId("test-CHECKOUT")).click();
+        driver.findElement(AppiumBy.accessibilityId("test-First Name")).sendKeys("John");
+        driver.findElement(AppiumBy.accessibilityId("test-Last Name")).sendKeys("Walt");
+        driver.findElement(AppiumBy.accessibilityId("test-Zip/Postal Code")).sendKeys("256891");
+        driver.findElement(AppiumBy.accessibilityId("test-CONTINUE")).click();
+
+        swipeAction(finger, new Point(533, 1154), new Point(535, 927));
+
+
+        performTap(finger, new Point(533, 2203));  // Last Button
+        performTap(finger, new Point(585, 1645));  // Final Button
+    }
+
+    @Test
+    public void logout(){
+        driver.findElement(AppiumBy.accessibilityId("test-Username")).sendKeys("standard_user");
+        driver.findElement(AppiumBy.accessibilityId("test-Password")).sendKeys("secret_sauce");
+        driver.findElement(AppiumBy.accessibilityId("test-LOGIN")).click();
+        driver.findElement(AppiumBy.accessibilityId("test-Menu")).click();
+        driver.findElement(AppiumBy.accessibilityId("test-LOGOUT")).click();
+    }
+
+
     public Point getCenterOfLocation(Point location, Dimension size){
         return new Point(location.getX()+ size.getWidth()/2, location.getY()+size.getHeight()/2);
 
     }
+
+    private void performTap(PointerInput finger, Point tapPoint) {
+        Sequence tap = new Sequence(finger, 1);
+        tap.addAction(finger.createPointerMove(Duration.ofMillis(0), PointerInput.Origin.viewport(), tapPoint.x, tapPoint.y));
+        tap.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
+        tap.addAction(new Pause(finger, Duration.ofMillis(50)));
+        tap.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
+        driver.perform(Arrays.asList(tap));
+    }
+
+    // Helper method to perform swipe actions
+    private void swipeAction(PointerInput finger, Point start, Point end) {
+        Sequence swipe = new Sequence(finger, 1);
+        swipe.addAction(finger.createPointerMove(Duration.ofMillis(0), PointerInput.Origin.viewport(), start.x, start.y));
+        swipe.addAction(finger.createPointerDown(PointerInput.MouseButton.LEFT.asArg()));
+        swipe.addAction(finger.createPointerMove(Duration.ofMillis(1000), PointerInput.Origin.viewport(), end.x, end.y));
+        swipe.addAction(finger.createPointerUp(PointerInput.MouseButton.LEFT.asArg()));
+        driver.perform(Arrays.asList(swipe));
+    }
+
+
     @After
     public void tearDown() {
         if (driver != null) {
